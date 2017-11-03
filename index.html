@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<!-- Demo : TSP | Author: Nishchay Garg -->
+<head>
+    <meta charset="UTF-8">
+    <title>Travelling Salesman</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    <meta property="og:url" content="http://hyphen.fun/tsp">
+    <meta property="og:title" content="Travelling Salesman">
+    <meta property="og:description" content="Discover the shortest route for visiting a group of cities">
+    <meta property="og:image" content="http://hyphen.fun/tsp/screenshot.jpg">
+    <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
+
+    <style>
+        svg,
+        body,
+        html {
+            box-sizing: border-box;
+            position: absolute;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        body {
+            background-color: rgb(0, 34, 35);
+            background-image: radial-gradient(circle, rgb(0, 34, 35), black);
+        }
+        
+        .content {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 16px;
+            max-width: 640px;
+            padding: 20px;
+            margin: 0 auto;
+            color: white;
+            user-select: none;
+        }
+        
+        .content p {
+            margin: 0;
+            line-height: 1.4
+        }
+        
+        .content a {
+            color: #5ef3fb;
+        }
+        
+        .content .title {
+            font-size: 36px;
+            text-align: center;
+        }
+        
+        .content .headline {
+            font-size: 24px;
+            text-align: center;
+        }
+        
+        .bl1 {
+            height: 48px;
+        }
+        
+        .bl2 {
+            height: 24px;
+        }
+        
+        .content .subhead {
+            line-height: 24px;
+            padding-top: 24px;
+            font-weight: 900
+        }
+        
+        .content .startbtn {
+            border-radius: 20px;
+            font-size: 18px;
+            background-color: #5ef3fb;
+            border: none;
+            rgb(0, 34, 35);
+            font-weight: 600;
+            line-height: 1;
+            padding: 0.75em 1em;
+            outline: none;
+            border-bottom: 2px solid #5eb5fb;
+            font-family: 'Varela Round', sans-serif;
+            margin: 50px auto;
+            transition: all 300ms linear;
+            cursor: pointer
+        }
+        
+        .content .startbtn:hover {
+            background-color: #5eb5fb;
+        }
+        
+        .content .btncnt {
+            text-align: center;
+        }
+        
+        path.marker {
+            d: path('m160.2,86c0,57 -80.1,141.3 -80.1,141.3s-80.1,-84.3 -80.1,-141.3c0,-57 35.9,-86.5 80.1,-86.5c44.2,0 80.1,29.5 80.1,86.5z');
+            fill: rgba(241, 181, 62, 0.6);
+            transform: scale(0.1);
+            transition: all 1s ease-in;
+        }
+        
+        svg circle {
+            r: 2;
+            transition: all 400ms ease-in
+        }
+        
+        svg.final path.marker {
+            opacity: 0;
+        }
+        
+        svg.final circle {
+            r: 4
+        }
+        
+        svg.final circle {
+            animation: blink 300ms infinite;
+        }
+        
+        svg.final line {
+            stroke-dasharray: 3px;
+            animation: dash 2s infinite;
+        }
+        
+        .tspbtn {
+            width: 56px;
+            height: 56px;
+            transition: all 100ms ease-in;
+            background: rgba(0, 0, 0, 0.5);
+            position: fixed;
+            bottom: 36px;
+            border-radius: 50%;
+            transform: rotate(0deg) translateX(0) rotate(0deg);
+            left: 50%;
+            left: calc(50% - 28px);
+            cursor: pointer;
+        }
+        
+        .tspbtn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: scale(1.02);
+        }
+        
+        .tspbtn svg {
+            background: transparent;
+            display: none;
+        }
+        
+        .tspbtn[data-state="1"] {
+            display: none;
+        }
+        
+        .tspbtn[data-state="2"] svg.btn2 {
+            display: block;
+            transform: scale(0.5);
+        }
+        
+        .tspbtn[data-state="3"] svg.btn2 {
+            display: block;
+            transform: scale(0.5);
+            animation: spin 5s linear infinite;
+        }
+        
+        .tspbtn[data-state="4"] svg.btn2 {
+            display: none;
+        }
+        
+        .tspbtn[data-state="4"] svg.btn3 {
+            display: block;
+            transform: scale(0.5);
+        }
+        
+        @keyframes dash {
+            from {
+                stroke-dasharray: 2px;
+            }
+            to {
+                stroke-dasharray: 5px;
+            }
+        }
+        
+        @keyframes blink {
+            from {
+                r: 4
+            }
+            to {
+                r: 5
+            }
+        }
+        
+        @keyframes spin {
+            from {
+                transform: rotate(0deg) scale(0.5);
+            }
+            to {
+                transform: rotate(360deg) scale(0.5);
+            }
+        }
+        
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content">
+        <div class="bl1"></div>
+        <p class="title">Travelling Salesman</p>
+        <p class="headline">Discover the shortest route for visiting a group of cities</p>
+        <div class="bl2"></div>
+        <p>Visualization by <a href="https://github.com/nicechay">Nishchay Garg</a></p>
+        <p class="subhead">The Problem</p>
+        <p>
+            A traveling salesman is getting ready for a big sales tour. Starting at his hometown, suitcase in hand, he will conduct a journey in which each of his target cities is visited exactly once before he returns home. What is the best order in which to visit them, so as to minimize the overall distance traveled?
+        </p>
+        <p class="subhead">The Visualization</p>
+        <p>
+            Click anywhere in the space to mark the positions of the cities.
+            <br/> The total number of cities can be in the range [3,15].
+            <br/> Press the play button to discover the optimum path.
+        </p>
+        <p class="subhead">The Best Part</p>
+        <p>No general method of solution is known</p>
+        <p class="btncnt">
+            <button class="startbtn">Let's Start</button>
+        </p>
+    </div>
+
+    <svg id="tsp"></svg>
+
+    <span class="tspbtn" data-state="1">
+
+<svg class="btn2" fill="#FFFFFF" height="48" viewBox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 5v14l11-7z"/>
+    <path d="M0 0h24v24H0z" fill="none"/>
+</svg>
+<svg class="btn3" fill="#FFFFFF" height="48" viewBox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/>
+    <path d="M0 0h24v24H0z" fill="none"/>
+</svg>
+
+</span>
+
+    <script>
+        function Point(t, e) {
+            this.x = t, this.y = e
+        }
+
+        function getArr(t) {
+            for (var e = [], n = 0; n < t.length; n++) 1 == t[n] && e.push(n);
+            return e
+        }
+
+        function getCount(t) {
+            for (var e = 0, n = 0; n < t.length; n++) 1 == t[n] && e++;
+            return e
+        }
+
+        function sq(t) {
+            return t * t
+        }
+
+        function dist(t, e) {
+            var n = main[t],
+                a = main[e];
+            return Math.sqrt(sq(n.x - a.x) + sq(n.y - a.y))
+        }
+
+        function reverse(t) {
+            for (i = 0; i < t.length / 2; i++) {
+                var e = t[i];
+                t[i] = t[t.length - 1 - i], t[t.length - 1 - i] = e
+            }
+        }
+
+        function rmIdx(t, e) {
+            var n = t.split(".");
+            return n[e] = 0, t = n.join(".")
+        }
+
+        function adIdx(t, e) {
+            var n = t.split(".");
+            return n[e] = 1, t = n.join(".")
+        }
+
+        function tsp(t, e) {
+            if (cache[t] && cache[t][e]) return cache[t][e];
+            if (cache[t] || (cache[t] = []), 0 == e) return 1 == getCount(t.split(".")) ? (store[t] || (store[t] = []), store[t][e] = 0, cache[t][e] = 0) : cache[t][e] = inf, cache[t][e];
+            var n = inf,
+                a = getArr(t.split("."));
+            t = rmIdx(t, e);
+            for (var r = 0; r < a.length; r++)
+                if (a[r] != e) {
+                    var s = tsp(t, a[r]) + dist(e, a[r]);
+                    n >= s && (n = s, store[t] || (store[t] = []), store[t][e] = a[r])
+                }
+            return t = adIdx(t, e), cache[t][e] = n
+        }
+
+        function tsprun(t) {
+            var e, n = [];
+            lastIndex = 0;
+            for (var a = inf, r = 0; r < t.length; r++) n[r] = 1;
+            e = n.join(".");
+            for (var r = 0; r < t.length; r++) {
+                var s = Math.min(a, tsp(e, r) + dist(0, r));
+                a > s && (a = s, lastIndex = r)
+            }
+            return a
+        }
+
+        function getEd() {
+            for (var t = [], e = [], n = [], a = 0; a < main.length; a++) t[a] = 1;
+            for (var r = t.join("."), s = lastIndex; s;) e.push(s), r = rmIdx(r, s), s = store[r][s];
+            for (var a = 0; a < e.length; a++) 0 == a ? n.push([0, e[a]]) : n.push([e[a - 1], e[a]]);
+            return n.push([e[e.length - 1], 0]), n
+        }
+
+        function ran(t, e) {
+            return t = Math.ceil(t), e = Math.floor(e), Math.floor(Math.random() * (e - t + 1)) + t
+        }
+
+        function drawMarker(t, e) {
+            var n = nsvg.cloneNode(!1),
+                a = path.cloneNode(!1);
+            a.classList.add("marker"), n.appendChild(a), n.setAttribute("width", "50px"), n.setAttribute("height", "50px"), n.setAttribute("x", t), n.setAttribute("y", e), svg.appendChild(n)
+        }
+
+        function makeDot(t, e) {
+            var n = 5,
+                a = dot.cloneNode(!1);
+            a.setAttribute("cx", t), a.setAttribute("cy", e), a.setAttribute("r", n), a.style.fill = colors[main.length % colors.length], dots.push(a), svg.appendChild(a), drawMarker(t - 8, e - 23)
+        }
+
+        function makeLine(t, e) {
+            var n = line.cloneNode(!1);
+            n.setAttribute("x1", t.x), n.setAttribute("y1", t.y), n.setAttribute("x2", e.x), n.setAttribute("y2", e.y), n.style["stroke-width"] = 2, n.style.stroke = "rgba(255,255,255,0.7)", lines.push(n), svg.appendChild(n)
+        }
+
+        function drawPath() {
+            for (var t = getEd(), e = 0; e < t.length; e++) {
+                var n = main[t[e][0]],
+                    a = main[t[e][1]];
+                makeLine(n, a)
+            }
+        }
+
+        function finalRun() {
+            var t = Date.now();
+            tsprun(main), btn.setAttribute("data-state", "4"), drawPath(), svg.classList.add("final"), console.log(Date.now() - t)
+        }
+
+        function reload() {
+            cache = {}, store = {}, main = [], btn.setAttribute("data-state", "1"), svg.innerHTML = " ", svg.classList.remove("final")
+        }
+        var cache = {},
+            inf = 1000000007,
+            store = {},
+            main = [],
+            limit = 15,
+            colors = ["rgba(255, 124, 114, 0.8)", "rgba(166, 255, 143, 0.8)", "rgba(94, 243, 251, 0.8)"],
+            svg = document.getElementById("tsp"),
+            btn = document.getElementsByClassName("tspbtn")[0],
+            content = document.getElementsByClassName("content")[0],
+            start = document.getElementsByClassName("startbtn")[0],
+            nsvg = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
+            dot = document.createElementNS("http://www.w3.org/2000/svg", "circle"),
+            line = document.createElementNS("http://www.w3.org/2000/svg", "line"),
+            polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon"),
+            path = document.createElementNS("http://www.w3.org/2000/svg", "path"),
+            dots = [],
+            lines = [];
+        svg.onclick = function(t) {
+            if (!(main.length >= limit)) {
+                var e = btn.getAttribute("data-state");
+                if ("1" == e || "2" == e) {
+                    var n = new Point(t.pageX, t.pageY);
+                    main.push(n), makeDot(n.x, n.y)
+                }
+                3 == main.length && btn.setAttribute("data-state", "2")
+            }
+        }, btn.onclick = function() {
+            "4" == btn.getAttribute("data-state") && (btn.setAttribute("data-state", "1"), reload()), "2" == btn.getAttribute("data-state") && (btn.setAttribute("data-state", "3"), finalRun())
+        }, start.onclick = function() {
+            svg.classList.remove("hide"), content.classList.add("hide")
+        }, svg.classList.add("hide");
+    </script>
+</body>
+
+</html>
